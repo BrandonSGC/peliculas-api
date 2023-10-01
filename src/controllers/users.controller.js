@@ -39,20 +39,21 @@ export const createUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     // Get Data
-    const { nombreUsuario } = req.params;
-    const { nombre, apellidos, email, contrasena, rolID } = req.body;
+    const { id } = req.params;
+    const { nombreUsuario, nombre, apellidos, email, contrasena, activo } = req.body;
 
     console.log(nombreUsuario, nombre);
     
     // Find and assign user to "user" variable.
-    const user = await Usuario.findByPk(nombreUsuario);
+    const user = await Usuario.findByPk(id);
 
     // Update data.
+    user.nombreUsuario = nombreUsuario;
     user.nombre = nombre;
     user.apellidos = apellidos;
     user.email = email;
     user.contrasena = contrasena;
-    user.rolID = rolID;
+    user.activo = activo;
     
     // Save data updated in DB.
     await user.save();
@@ -68,12 +69,12 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     // Get id from the url parameters.
-    const { nombreUsuario } = req.params;
+    const { id } = req.params;
     
     // Delete user.
     await Usuario.destroy({
       where: {
-        nombreUsuario: nombreUsuario
+        usuarioID: id
       }
     });
     res.json({message: 'Usuario eliminado exitósamente!'});
