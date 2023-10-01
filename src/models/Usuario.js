@@ -3,9 +3,15 @@ import { DataTypes } from 'sequelize';
 import { Roles } from './Roles.js';
 
 export const Usuario = sequelize.define('Usuario', {
+  usuarioID: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
   nombreUsuario: {
     type: DataTypes.STRING,
     primaryKey: true,
+    unique: true
   },
   nombre: {
     type: DataTypes.STRING(30),
@@ -20,18 +26,13 @@ export const Usuario = sequelize.define('Usuario', {
     allowNull: false,
   },
   contrasena: {
-    type: DataTypes.STRING(20),
+    type: DataTypes.STRING(30),
     allowNull: false,
   },
-  rolID: {
-    type: DataTypes.INTEGER,
-  },
+  activo: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  }
 }, {
   timestamps: false,
-});
-
-// Define the association
-Usuario.belongsTo(Roles, {
-  foreignKey: 'rolID', // Nombre del campo en la tabla Usuario que hace referencia a Roles
-  targetKey: 'rolID', // Nombre del campo en la tabla Roles que se referencia
 });

@@ -14,17 +14,17 @@ export const getUsers = async (req, res) => {
 export const createUser = async (req, res) => {
   try {
     // Get body data.
-    const { nombreUsuario, nombre, apellidos, email, contrasena, rolID } =
+    const { nombreUsuario, nombre, apellidos, email, contrasena, activo } =
       req.body;
 
     // Create user.
-    const newUser = await Usuario.create({
+    await Usuario.create({
       nombreUsuario,
       nombre,
       apellidos,
       email,
       contrasena,
-      rolID,
+      activo,
     });
 
     //console.log(newUser);
