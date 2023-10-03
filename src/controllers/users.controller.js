@@ -39,6 +39,8 @@ export const updateUser = async (req, res) => {
     // Get Data
     const { id } = req.params;
     const { nombreUsuario, nombre, apellidos, email, contrasena, activo } = req.body;
+
+    console.log(nombreUsuario, nombre, apellidos, email, contrasena, activo);
     
     // Find and assign user to "user" variable.
     const user = await Usuario.findByPk(id);
