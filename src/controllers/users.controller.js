@@ -27,8 +27,6 @@ export const createUser = async (req, res) => {
       activo,
     });
 
-    //console.log(newUser);
-
     res.status(201).json({ message: "Usuario creado exitósamente!" });
   } catch (error) {
     console.log(`An error has ocurred while creating an user: ${error.message}`);
@@ -41,8 +39,6 @@ export const updateUser = async (req, res) => {
     // Get Data
     const { id } = req.params;
     const { nombreUsuario, nombre, apellidos, email, contrasena, activo } = req.body;
-
-    console.log(nombreUsuario, nombre);
     
     // Find and assign user to "user" variable.
     const user = await Usuario.findByPk(id);
@@ -81,5 +77,25 @@ export const deleteUser = async (req, res) => {
   } catch (error) {
     console.log(`An error has ocurred while getting users: ${error}`);
     res.status(500).json({message: error.message});
+  }
+};
+
+
+// Function to activate / disactivate user
+export const setUserStatus = async (req, res) => {
+  try {
+    const { id, status } = req.params;
+
+    const user = await Usuario.findByPk(id);
+    user.activo = status;
+
+    console.log(id, status);
+    
+    user.save();
+
+    res.json({message: 'Estado del usuario cambiado exitósamente!'});
+  } catch (error) {
+    console.log(`An error has ocurred while getting users: ${error}`);
+    res.status(500).json({message: error.message})
   }
 };
