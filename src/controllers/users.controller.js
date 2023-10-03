@@ -1,4 +1,4 @@
-import { Usuario } from "../models/Usuario.js";
+import { Usuario } from "../models/Usuarios.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -39,8 +39,6 @@ export const updateUser = async (req, res) => {
     // Get Data
     const { id } = req.params;
     const { nombreUsuario, nombre, apellidos, email, contrasena, activo } = req.body;
-
-    console.log(nombreUsuario, nombre, apellidos, email, contrasena, activo);
     
     // Find and assign user to "user" variable.
     const user = await Usuario.findByPk(id);
@@ -90,8 +88,6 @@ export const setUserStatus = async (req, res) => {
 
     const user = await Usuario.findByPk(id);
     user.activo = status;
-
-    console.log(id, status);
     
     user.save();
 

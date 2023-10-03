@@ -5,7 +5,7 @@ export const Pelicula = sequelize.define('Pelicula', {
   peliculaID: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoncrement: true
+    autoIncrement: true,
   },
   nombre: {
     type: DataTypes.STRING(60),
@@ -29,4 +29,5 @@ export const Pelicula = sequelize.define('Pelicula', {
   }
 }, {
   timestamps: false,
+  tableName: 'Pelicula'
 });
