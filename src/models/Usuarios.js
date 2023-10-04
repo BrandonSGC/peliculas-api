@@ -8,8 +8,7 @@ export const Usuario = sequelize.define('Usuario', {
     primaryKey: true
   },
   nombreUsuario: {
-    type: DataTypes.STRING,
-    primaryKey: true,
+    type: DataTypes.STRING(30),
     unique: true
   },
   nombre: {
@@ -34,4 +33,5 @@ export const Usuario = sequelize.define('Usuario', {
   }
 }, {
   timestamps: false,
+  tableName: 'Usuarios'
 });

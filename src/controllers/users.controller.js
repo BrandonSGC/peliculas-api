@@ -1,4 +1,4 @@
-import { Usuario } from "../models/Usuario.js";
+import { Usuario } from "../models/Usuarios.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -73,7 +73,7 @@ export const deleteUser = async (req, res) => {
         usuarioID: id
       }
     });
-    res.json({message: 'Usuario eliminado exitósamente!'});
+    res.status(200).res.json({message: 'Usuario eliminado exitósamente!'});
   } catch (error) {
     console.log(`An error has ocurred while getting users: ${error}`);
     res.status(500).json({message: error.message});
@@ -88,8 +88,6 @@ export const setUserStatus = async (req, res) => {
 
     const user = await Usuario.findByPk(id);
     user.activo = status;
-
-    console.log(id, status);
     
     user.save();
 
