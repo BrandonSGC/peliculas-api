@@ -28,3 +28,25 @@ export const createMovie = async (req, res) => {
     res.status(500).json({ error: 'Error creating movie' });
   }
 }
+
+export const updateMovie = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, resena, califiacionID, poster, fecha } = req.body;
+
+    const movie = await Pelicula.findByPk(id);
+
+    movie.nombre = nombre;
+    movie.resena = resena;
+    movie.califiacionID = califiacionID;
+    movie.poster = poster;
+    movie.fecha = fecha;
+
+    movie.save();
+
+    res.status(200).send({message: 'Película actualizada correctamente!'})
+
+  } catch (error) {
+    console.log(`An error has ocurred while updating movie: ${error}`);
+  }
+}
