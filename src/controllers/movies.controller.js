@@ -45,7 +45,7 @@ export const updateMovie = async (req, res) => {
 
     movie.save();
 
-    res.status(200).send({message: 'Película actualizada correctamente!'})
+    res.status(200).json({message: 'Película actualizada correctamente!'})
 
   } catch (error) {
     console.log(`An error has ocurred while updating movie: ${error}`);
@@ -64,7 +64,7 @@ export const deleteMovie = async (req, res) => {
         peliculaID: id
       }
     });
-    res.json({message: 'Película eliminada exitósamente!'});
+    res.status(200).json({message: 'Película eliminada exitósamente!'});
   } catch (error) {
     console.log(`An error has ocurred while getting movies: ${error}`);
     res.status(500).json({message: error.message});
@@ -87,6 +87,25 @@ export const createComment = async (req, res) => {
     res.status(201).json({ message: 'Comentario creado exitósamente!' });
   } catch (error) {
     console.log(`An error has ocurred while creating the comment: ${error}`);
+    res.status(500).json({message: error.message});
+  }
+}
+
+
+export const deleteComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(id);
+
+    await Comentario.destroy({
+      where: {
+        comentarioID: id
+      }
+    });
+
+    res.status(200).json({message: 'Comentario eliminado exitósamente!'});
+  } catch (error) {
+    console.log(`An error has ocurred while deleting the comment: ${error}`);
     res.status(500).json({message: error.message});
   }
 }
