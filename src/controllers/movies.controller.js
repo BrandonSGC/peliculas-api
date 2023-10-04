@@ -50,3 +50,22 @@ export const updateMovie = async (req, res) => {
     console.log(`An error has ocurred while updating movie: ${error}`);
   }
 }
+
+
+export const deleteMovie = async (req, res) => {
+  try {
+    // Get id from the url parameters.
+    const { id } = req.params;
+    
+    // Delete user.
+    await Pelicula.destroy({
+      where: {
+        peliculaID: id
+      }
+    });
+    res.json({message: 'Película eliminada exitósamente!'});
+  } catch (error) {
+    console.log(`An error has ocurred while getting movies: ${error}`);
+    res.status(500).json({message: error.message});
+  }
+};
