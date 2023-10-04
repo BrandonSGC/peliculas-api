@@ -1,6 +1,4 @@
-# Creación de la Base de Datos ProyectoProgV
-
-Este archivo README describe el proceso de creación de la base de datos "ProyectoProgV" junto con la estructura de las tablas utilizando SQL.
+# API de Peliculas
 
 ## Script SQL
 
