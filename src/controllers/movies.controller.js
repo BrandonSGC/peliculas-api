@@ -92,6 +92,29 @@ export const createComment = async (req, res) => {
 }
 
 
+export const updateComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { usuarioID, peliculaID, contenido, comentarioPadreID, fecha } = req.body;
+
+    const comment = await Comentario.findByPk(id);
+
+    comment.usuarioID = usuarioID;
+    comment.peliculaID = peliculaID;
+    comment.contenido = contenido;
+    comment.comentarioPadreID = comentarioPadreID;
+    comment.fecha = fecha;
+
+    comment.save();
+
+    res.status(200).json({message: 'Comentario actualizada correctamente!'})
+
+  } catch (error) {
+    console.log(`An error has ocurred while updating the comment: ${error}`);
+  }
+}
+
+
 export const deleteComment = async (req, res) => {
   try {
     const { id } = req.params;
