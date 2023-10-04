@@ -1,4 +1,5 @@
 import { Pelicula } from '../models/Pelicula.js';
+import { Comentario } from '../models/Comentarios.js'
 
 export const getMovies = async (req, res) => {
   try {
@@ -69,3 +70,23 @@ export const deleteMovie = async (req, res) => {
     res.status(500).json({message: error.message});
   }
 };
+
+
+export const createComment = async (req, res) => {
+  try {
+    const { usuarioID, peliculaID, contenido, comentarioPadreID, fecha } = req.body;
+
+    await Comentario.create({
+      peliculaID,
+      usuarioID,
+      contenido,
+      comentarioPadreID,
+      fecha
+    });
+
+    res.status(201).json({ message: 'Comentario creado exitósamente!' });
+  } catch (error) {
+    console.log(`An error has ocurred while creating the comment: ${error}`);
+    res.status(500).json({message: error.message});
+  }
+}
