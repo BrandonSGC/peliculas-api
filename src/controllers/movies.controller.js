@@ -1,4 +1,5 @@
 import { Pelicula } from '../models/Pelicula.js';
+import { Comentario } from '../models/Comentarios.js'
 
 export const getMovies = async (req, res) => {
   try {
@@ -44,7 +45,7 @@ export const updateMovie = async (req, res) => {
 
     movie.save();
 
-    res.status(200).send({message: 'Película actualizada correctamente!'})
+    res.status(200).json({message: 'Película actualizada correctamente!'})
 
   } catch (error) {
     console.log(`An error has ocurred while updating movie: ${error}`);
@@ -63,9 +64,71 @@ export const deleteMovie = async (req, res) => {
         peliculaID: id
       }
     });
-    res.json({message: 'Película eliminada exitósamente!'});
+    res.status(200).json({message: 'Película eliminada exitósamente!'});
   } catch (error) {
     console.log(`An error has ocurred while getting movies: ${error}`);
     res.status(500).json({message: error.message});
   }
 };
+
+
+export const createComment = async (req, res) => {
+  try {
+    const { usuarioID, peliculaID, contenido, comentarioPadreID, fecha } = req.body;
+
+    await Comentario.create({
+      peliculaID,
+      usuarioID,
+      contenido,
+      comentarioPadreID,
+      fecha
+    });
+
+    res.status(201).json({ message: 'Comentario creado exitósamente!' });
+  } catch (error) {
+    console.log(`An error has ocurred while creating the comment: ${error}`);
+    res.status(500).json({message: error.message});
+  }
+}
+
+
+export const updateComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { usuarioID, peliculaID, contenido, comentarioPadreID, fecha } = req.body;
+
+    const comment = await Comentario.findByPk(id);
+
+    comment.usuarioID = usuarioID;
+    comment.peliculaID = peliculaID;
+    comment.contenido = contenido;
+    comment.comentarioPadreID = comentarioPadreID;
+    comment.fecha = fecha;
+
+    comment.save();
+
+    res.status(200).json({message: 'Comentario actualizada correctamente!'})
+
+  } catch (error) {
+    console.log(`An error has ocurred while updating the comment: ${error}`);
+  }
+}
+
+
+export const deleteComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(id);
+
+    await Comentario.destroy({
+      where: {
+        comentarioID: id
+      }
+    });
+
+    res.status(200).json({message: 'Comentario eliminado exitósamente!'});
+  } catch (error) {
+    console.log(`An error has ocurred while deleting the comment: ${error}`);
+    res.status(500).json({message: error.message});
+  }
+}
