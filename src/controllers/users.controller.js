@@ -1,6 +1,9 @@
 import { Usuario } from "../models/Usuarios.js";
+<<<<<<< HEAD
 import { sequelize } from '../database/connection.js';
 import jwt from 'jsonwebtoken';
+=======
+>>>>>>> 19523a35598c8c28e97e67caf166ea4f7f35f994
 
 export const getUsers = async(req, res) => {
     try {
@@ -132,6 +135,26 @@ const validateCredentials = async(username, password) => {
 };
 
 
+<<<<<<< HEAD
+=======
+export const deleteUser = async (req, res) => {
+  try {
+    // Get id from the url parameters.
+    const { id } = req.params;
+    
+    // Delete user.
+    await Usuario.destroy({
+      where: {
+        usuarioID: id
+      }
+    });
+    res.status(200).res.json({message: 'Usuario eliminado exitósamente!'});
+  } catch (error) {
+    console.log(`An error has ocurred while getting users: ${error}`);
+    res.status(500).json({message: error.message});
+  }
+};
+>>>>>>> 19523a35598c8c28e97e67caf166ea4f7f35f994
 
 export const loginUser = async(req, res) => {
     const { username, password } = req.body;
@@ -140,6 +163,7 @@ export const loginUser = async(req, res) => {
         // Llamar al método privado para validar las credenciales
         const isValidCredentials = await validateCredentials(username, password);
 
+<<<<<<< HEAD
         if (isValidCredentials) {
             // Inicio de sesión exitoso y usuario activo
             const token = generateToken(); // Genera el token
@@ -152,4 +176,16 @@ export const loginUser = async(req, res) => {
         console.error('Error al iniciar sesión:', error);
         res.status(500).json({ message: 'Error al iniciar sesión' });
     }
+=======
+    const user = await Usuario.findByPk(id);
+    user.activo = status;
+    
+    user.save();
+
+    res.json({message: 'Estado del usuario cambiado exitósamente!'});
+  } catch (error) {
+    console.log(`An error has ocurred while getting users: ${error}`);
+    res.status(500).json({message: error.message})
+  }
+>>>>>>> 19523a35598c8c28e97e67caf166ea4f7f35f994
 };
