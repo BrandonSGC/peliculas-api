@@ -19,7 +19,6 @@ export const getTop5RecentMovies = async (req, res) => {
     const movieInfoPromises = [];
 
     for (let i = 0; i < movieIDs.length; i++) {
-      console.log(`Recorriendo posición: ${movieIDs[i]}`);
       const movieInfoPromise = getMovieInfo(movieIDs[i]);
       movieInfoPromises.push(movieInfoPromise);
     }
@@ -39,8 +38,6 @@ export const getMovieInfoById = async (req, res) => {
     const { id } = req.params;
 
     const fullMovieInfo = await getMovieInfo(id);
-
-    console.log(fullMovieInfo);
 
     if (fullMovieInfo) {
       res.status(200).json(fullMovieInfo);
