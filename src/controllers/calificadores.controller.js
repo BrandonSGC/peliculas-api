@@ -3,7 +3,7 @@ import { Calificacion } from "../models/Calificacion.js";
 export const getCalificadores = async (req, res) => {
   try {
     const calificadores = await Calificacion.findAll();
-    res.json(calificadores);
+    res.status(200).json(calificadores);
   } catch (error) {
     console.log(`Ocurrió un error al obtener los calificadores: ${error}`);
     res.status(500).json({ message: error.message });
@@ -52,7 +52,7 @@ export const deleteCalificacion = async (req, res) => {
     
     if (calif) {
       await calif.destroy();
-      res.json({ message: "Calificación eliminada exitosamente!" });
+      res.status(200).json({ message: "Calificación eliminada exitosamente!" });
     } else {
       res.status(404).json({ message: "Calificación no encontrada." });
     }
