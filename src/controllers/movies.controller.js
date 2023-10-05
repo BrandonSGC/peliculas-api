@@ -10,7 +10,11 @@ export const getTop5RecentMovies = async (req, res) => {
     
     // Get ids from the result object.
     const movieIDs = Object.values(result).map(item => item.peliculaID);
-    console.log(movieIDs);
+  
+    if (movieIDs.length === 0) {
+      res.status(404).json({message:"No se han encontrado peliculas..."});
+      return;
+    }
 
     const movieInfoPromises = [];
 
@@ -36,13 +40,19 @@ export const getMovieInfoById = async (req, res) => {
 
     const fullMovieInfo = await getMovieInfo(id);
 
-    res.status(200).json(fullMovieInfo);
+    console.log(fullMovieInfo);
 
+    if (fullMovieInfo) {
+      res.status(200).json(fullMovieInfo);
+    } else {
+      res.status(404).json({ message: "No se ha encontrado la película." });
+    }
   } catch (error) {
-    console.log(`An error has ocurred while getting movies: ${error}`);
-    res.status(500).json({message: error.message});
+    console.error(`Ha ocurrido un error al obtener información de la película: ${error}`);
+    res.status(500).json({ message: "Error interno del servidor." });
   }
 };
+
 
 export const createMovie = async (req, res) => {
   try {
@@ -68,9 +78,12 @@ export const updateMovie = async (req, res) => {
     const { id } = req.params;
     const { nombre, resena, calificacionID, poster, fecha } = req.body;
 
-    console.log(id, calificacionID);
-
     const movie = await Pelicula.findByPk(id);
+
+    if (!movie) {
+        res.status(404).json({ message: 'La película a modificar no existe.' });
+        return;
+    }
 
     movie.nombre = nombre;
     movie.resena = resena;
@@ -92,6 +105,12 @@ export const deleteMovie = async (req, res) => {
   try {
     // Get id from the url parameters.
     const { id } = req.params;
+
+    const movie = await Pelicula.findByPk(id);
+    if (!movie) {
+        res.status(404).json({ message: 'La película a eliminar no existe.' });
+        return;
+    }
     
     // Delete user.
     await Pelicula.destroy({
@@ -105,8 +124,6 @@ export const deleteMovie = async (req, res) => {
     res.status(500).json({message: error.message});
   }
 };
-
-
 
 
 export const createComment = async (req, res) => {
@@ -135,6 +152,10 @@ export const updateComment = async (req, res) => {
     const { usuarioID, peliculaID, contenido, comentarioPadreID, fecha } = req.body;
 
     const comment = await Comentario.findByPk(id);
+    if (!comment) {
+      res.status(404).json({ message: 'El comentario a modificar no existe.' });
+      return;
+    }
 
     comment.usuarioID = usuarioID;
     comment.peliculaID = peliculaID;
@@ -155,7 +176,12 @@ export const updateComment = async (req, res) => {
 export const deleteComment = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id);
+
+    const comment = await Comentario.findByPk(id);
+    if (!comment) {
+      res.status(404).json({ message: 'El comentario a eliminar no existe.' });
+      return;
+  }
 
     await Comentario.destroy({
       where: {
@@ -172,13 +198,16 @@ export const deleteComment = async (req, res) => {
 
 
 // Functions
-
+const isEmpty = (obj) => Object.keys(obj).length === 0;
 
 async function getMovieInfo(id) {
   const movieInfo = await sequelize.query('CALL ObtenerInformacionPelicula(:peliculaID)', {
     replacements: { peliculaID: id },
     type: sequelize.QueryTypes.SELECT,
   });
+
+  // Validar que encuentra la pelicula.
+  if (isEmpty(movieInfo[0])) return null;
 
   const calificaciones = await sequelize.query('CALL ObtenerCalificacionesPelicula(:peliculaID)', {
     replacements: { peliculaID: id },
@@ -190,10 +219,16 @@ async function getMovieInfo(id) {
     type: sequelize.QueryTypes.SELECT,
   });
 
+  const comentarios = await sequelize.query('CALL ObtenerComentariosPelicula(:peliculaID)', {
+    replacements: { peliculaID: id },
+    type: sequelize.QueryTypes.SELECT,
+  });
+
   const fullMovieInfo = {
     movieInfo: movieInfo[0]['0'],
     calificaciones: calificaciones[0]['0'], 
-    involucrados: involucrados[0]
+    involucrados: involucrados[0] || null,
+    comentarios: comentarios[0] || null,
   }
 
   return fullMovieInfo;

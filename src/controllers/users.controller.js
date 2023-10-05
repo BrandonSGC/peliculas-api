@@ -6,7 +6,7 @@ export const getUsers = async(req, res) => {
     try {
         // Obtener todos los usuarios.
         const users = await Usuario.findAll();
-        res.json(users);
+        res.status(200).json(users);
     } catch (error) {
         console.log(`Ha ocurrido un error al obtener los usuarios: ${error}`);
         res.status(500).json({ message: error.message });
@@ -15,10 +15,15 @@ export const getUsers = async(req, res) => {
 
 export const createUser = async(req, res) => {
     try {
-        // Obtener datos del cuerpo de la solicitud.
         const { nombreUsuario, nombre, apellidos, email, contrasena, activo } = req.body;
 
-        // Crear usuario.
+        // Validar que no haya uno con el mismo nombre de usuario.
+        const existingUser = await Usuario.findOne({ where: { nombreUsuario } });
+
+        if (existingUser) {
+            res.status(409).json({ message: 'El nombre de usuario ya está en uso.' });
+        }
+
         await Usuario.create({
             nombreUsuario,
             nombre,
@@ -41,8 +46,12 @@ export const updateUser = async(req, res) => {
         const { id } = req.params;
         const { nombreUsuario, nombre, apellidos, email, contrasena, activo } = req.body;
 
-        // Buscar y asignar el usuario a la variable "user".
         const user = await Usuario.findByPk(id);
+
+        if (!user) {
+            res.status(404).json({ message: 'El usuario a modificar no existe.' });
+            return;
+        }
 
         // Actualizar datos.
         user.nombreUsuario = nombreUsuario;
@@ -54,8 +63,8 @@ export const updateUser = async(req, res) => {
 
         // Guardar datos actualizados en la base de datos.
         await user.save();
-
-        res.status(201).json({ message: "Usuario actualizado exitosamente!" });
+        res.status(200).json({ message: "Usuario actualizado exitosamente!" });
+        
     } catch (error) {
         console.log(`Ha ocurrido un error al actualizar un usuario: ${error.message}`);
         res.status(500).json({ message: error.message });
@@ -67,25 +76,42 @@ export const deleteUser = async(req, res) => {
         // Obtener ID de los parámetros de la URL.
         const { id } = req.params;
 
+        const user = await Usuario.findByPk(id);
+        if (!user) {
+            res.status(404).json({ message: 'El usuario a eliminar no existe.' });
+            return;
+        }
+
+        // Por corregir:
+        /* Validar si ha hecho comentarios, si los ha hecho 
+        eliminar comentarios para posteriormente poder eliminar
+        el usuario. */
+
         // Eliminar usuario.
         await Usuario.destroy({
             where: {
                 usuarioID: id
             }
         });
-        res.status(200).json({ message: 'Usuario eliminado exitosamente!' });
+        res.status(204).json({ message: 'Usuario eliminado exitosamente!' });
     } catch (error) {
         console.log(`Ha ocurrido un error al eliminar un usuario: ${error}`);
         res.status(500).json({ message: error.message });
     }
 };
 
-// Función para activar/desactivar usuario
+// Función para activar / desactivar usuario
 export const setUserStatus = async(req, res) => {
     try {
         const { id, status } = req.params;
 
         const user = await Usuario.findByPk(id);
+
+        if (!user) {
+            res.status(404).json({ message: 'El usuario a modificar el estado no existe.' });
+            return;
+        }
+        
         user.activo = status;
 
         user.save();
@@ -130,7 +156,6 @@ const validateCredentials = async(username, password) => {
         return false;
     }
 };
-
 
 
 export const loginUser = async(req, res) => {
