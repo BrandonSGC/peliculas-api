@@ -33,13 +33,15 @@ export const createMovie = async (req, res) => {
 export const updateMovie = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, resena, califiacionID, poster, fecha } = req.body;
+    const { nombre, resena, calificacionID, poster, fecha } = req.body;
+
+    console.log(id, calificacionID);
 
     const movie = await Pelicula.findByPk(id);
 
     movie.nombre = nombre;
     movie.resena = resena;
-    movie.califiacionID = califiacionID;
+    movie.calificacionID = calificacionID;
     movie.poster = poster;
     movie.fecha = fecha;
 
