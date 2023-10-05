@@ -171,6 +171,7 @@ export const loginUser = async(req, res) => {
             res.json({ token });
         } else {
             // Inicio de sesión incorrecto o usuario inactivo
+            // 401 = Carece de credenciales Invalidas.
             res.status(401).json({ message: 'Credenciales inválidas o usuario inactivo' });
         }
     } catch (error) {
