@@ -1,5 +1,6 @@
 import { Pelicula } from '../models/Pelicula.js';
 import { Comentario } from '../models/Comentarios.js'
+import { sequelize } from '../database/connection.js';
 
 export const getMovies = async (req, res) => {
   try {
@@ -73,6 +74,38 @@ export const deleteMovie = async (req, res) => {
   }
 };
 
+export const getMovieInfo = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const movieInfo = await sequelize.query('CALL ObtenerInformacionPelicula(:peliculaID)', {
+      replacements: { peliculaID: id },
+      type: sequelize.QueryTypes.SELECT,
+    });
+
+    const calificaciones = await sequelize.query('CALL ObtenerCalificacionesPelicula(:peliculaID)', {
+      replacements: { peliculaID: id },
+      type: sequelize.QueryTypes.SELECT,
+    });
+
+    const involucrados = await sequelize.query('CALL ObtenerInvolucradosPelicula(:peliculaID)', {
+      replacements: { peliculaID: id },
+      type: sequelize.QueryTypes.SELECT,
+    });
+
+    const fullMovieInfo = {
+      movieInfo: movieInfo[0]['0'],
+      calificaciones: calificaciones[0]['0'], 
+      involucrados: involucrados[0]
+    }
+
+    res.status(200).json(fullMovieInfo);
+
+  } catch (error) {
+    console.log(`An error has ocurred while getting movies: ${error}`);
+    res.status(500).json({message: error.message});
+  }
+};
 
 export const createComment = async (req, res) => {
   try {
