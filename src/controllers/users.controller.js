@@ -94,7 +94,7 @@ export const deleteUser = async(req, res) => {
                 usuarioID: id
             }
         });
-        res.status(204).json({ message: 'Usuario eliminado exitosamente!' });
+        res.status(200).json({ message: 'Usuario eliminado exitosamente!' });
     } catch (error) {
         console.log(`Ha ocurrido un error al eliminar un usuario: ${error}`);
         res.status(500).json({ message: error.message });
@@ -117,7 +117,7 @@ export const setUserStatus = async(req, res) => {
 
         user.save();
 
-        res.json({ message: 'Estado del usuario cambiado exitosamente!' });
+        res.status(200).json({ message: 'Estado del usuario cambiado exitosamente!' });
     } catch (error) {
         console.log(`Ha ocurrido un error al cambiar el estado del usuario: ${error}`);
         res.status(500).json({ message: error.message })
