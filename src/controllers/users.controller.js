@@ -15,13 +15,14 @@ export const getUsers = async(req, res) => {
 
 export const createUser = async(req, res) => {
     try {
-        const { nombreUsuario, nombre, apellidos, email, contrasena, activo } = req.body;
+        const { nombreUsuario, nombre, apellidos, email, contrasena } = req.body;
 
         // Validar que no haya uno con el mismo nombre de usuario.
         const existingUser = await Usuario.findOne({ where: { nombreUsuario } });
 
         if (existingUser) {
             res.status(409).json({ message: 'El nombre de usuario ya está en uso.' });
+            return;
         }
 
         await Usuario.create({
@@ -30,7 +31,7 @@ export const createUser = async(req, res) => {
             apellidos,
             email,
             contrasena,
-            activo,
+            activo: 1,
         });
 
         res.status(201).json({ message: "Usuario creado exitosamente!" });
