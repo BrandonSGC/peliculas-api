@@ -2,10 +2,42 @@ import { Pelicula } from '../models/Pelicula.js';
 import { Comentario } from '../models/Comentarios.js'
 import { sequelize } from '../database/connection.js';
 
-export const getMovies = async (req, res) => {
+export const getTop5RecentMovies = async (req, res) => {
   try {
-    const movies = await Pelicula.findAll();
-    res.json(movies);
+    const [result] = await sequelize.query('CALL ObtenerIdTop5PeliculasMasRecientes()', {
+      type: sequelize.QueryTypes.SELECT,
+    });
+    
+    // Get ids from the result object.
+    const movieIDs = Object.values(result).map(item => item.peliculaID);
+    console.log(movieIDs);
+
+    const movieInfoPromises = [];
+
+    for (let i = 0; i < movieIDs.length; i++) {
+      console.log(`Recorriendo posición: ${movieIDs[i]}`);
+      const movieInfoPromise = getMovieInfo(movieIDs[i]);
+      movieInfoPromises.push(movieInfoPromise);
+    }
+
+    const moviesInfo = await Promise.all(movieInfoPromises);
+
+    res.status(200).json(moviesInfo);
+
+  } catch (error) {
+    console.log(`An error has occurred while getting movies: ${error}`);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getMovieInfoById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const fullMovieInfo = await getMovieInfo(id);
+
+    res.status(200).json(fullMovieInfo);
+
   } catch (error) {
     console.log(`An error has ocurred while getting movies: ${error}`);
     res.status(500).json({message: error.message});
@@ -74,38 +106,8 @@ export const deleteMovie = async (req, res) => {
   }
 };
 
-export const getMovieInfo = async (req, res) => {
-  try {
-    const { id } = req.params;
 
-    const movieInfo = await sequelize.query('CALL ObtenerInformacionPelicula(:peliculaID)', {
-      replacements: { peliculaID: id },
-      type: sequelize.QueryTypes.SELECT,
-    });
 
-    const calificaciones = await sequelize.query('CALL ObtenerCalificacionesPelicula(:peliculaID)', {
-      replacements: { peliculaID: id },
-      type: sequelize.QueryTypes.SELECT,
-    });
-
-    const involucrados = await sequelize.query('CALL ObtenerInvolucradosPelicula(:peliculaID)', {
-      replacements: { peliculaID: id },
-      type: sequelize.QueryTypes.SELECT,
-    });
-
-    const fullMovieInfo = {
-      movieInfo: movieInfo[0]['0'],
-      calificaciones: calificaciones[0]['0'], 
-      involucrados: involucrados[0]
-    }
-
-    res.status(200).json(fullMovieInfo);
-
-  } catch (error) {
-    console.log(`An error has ocurred while getting movies: ${error}`);
-    res.status(500).json({message: error.message});
-  }
-};
 
 export const createComment = async (req, res) => {
   try {
@@ -166,4 +168,33 @@ export const deleteComment = async (req, res) => {
     console.log(`An error has ocurred while deleting the comment: ${error}`);
     res.status(500).json({message: error.message});
   }
+}
+
+
+// Functions
+
+
+async function getMovieInfo(id) {
+  const movieInfo = await sequelize.query('CALL ObtenerInformacionPelicula(:peliculaID)', {
+    replacements: { peliculaID: id },
+    type: sequelize.QueryTypes.SELECT,
+  });
+
+  const calificaciones = await sequelize.query('CALL ObtenerCalificacionesPelicula(:peliculaID)', {
+    replacements: { peliculaID: id },
+    type: sequelize.QueryTypes.SELECT,
+  });
+
+  const involucrados = await sequelize.query('CALL ObtenerInvolucradosPelicula(:peliculaID)', {
+    replacements: { peliculaID: id },
+    type: sequelize.QueryTypes.SELECT,
+  });
+
+  const fullMovieInfo = {
+    movieInfo: movieInfo[0]['0'],
+    calificaciones: calificaciones[0]['0'], 
+    involucrados: involucrados[0]
+  }
+
+  return fullMovieInfo;
 }
