@@ -1,9 +1,5 @@
 import app from './app.js';
-<<<<<<< HEAD
 import { sequelize } from './database/connection.js';
-=======
-import {sequelize} from './database/connection.js';
->>>>>>> 19523a35598c8c28e97e67caf166ea4f7f35f994
 import './models/Usuarios.js';
 
 const PORT = process.env.PORT || 3000;
