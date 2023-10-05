@@ -84,3 +84,100 @@ CREATE TABLE IF NOT EXISTS Comentarios (
     FOREIGN KEY (peliculaID) REFERENCES Pelicula(peliculaID),
     FOREIGN KEY (usuarioID) REFERENCES Usuarios(usuarioID)
 );
+
+-- Stored Procedures:
+
+DELIMITER //
+CREATE PROCEDURE LoginUsuario(
+    IN p_username VARCHAR(50),
+    IN p_password VARCHAR(50)
+)
+BEGIN
+    DECLARE activoID INT;
+
+    -- Verificar si las credenciales son correctas y obtener el ID del usuario
+    SELECT activo INTO activoID
+    FROM Usuarios
+    WHERE nombreUsuario = p_username AND contrasena = p_password;
+
+    -- Verificar si el usuario está activo
+    IF activoID = 0 THEN
+        -- Credenciales incorrectas
+        SELECT 0;
+    ELSEif activoID is null then
+		SELECT 0;
+	else
+        -- Inicio de sesión exitoso
+        SELECT 1;
+    END IF;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE ObtenerIdTop5PeliculasMasRecientes()
+BEGIN
+  SELECT peliculaID FROM Pelicula
+  ORDER BY fecha DESC
+  LIMIT 5;
+END //
+DELIMITER ;
+
+CALL ObtenerIdTop5PeliculasMasRecientes();
+
+DELIMITER //
+CREATE PROCEDURE ObtenerInformacionPelicula(IN peliculaID INT)
+BEGIN
+    SELECT
+        P.peliculaID,
+        P.nombre,
+        P.resena,
+        P.poster,
+        P.fecha
+    FROM Pelicula P
+    WHERE P.peliculaID = peliculaID;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE ObtenerCalificacionesPelicula(IN peliculaIDParam INT)
+BEGIN
+    SELECT
+        C.calificacion,
+        E.nombre AS nombre_experto
+    FROM Calificaciones C
+    INNER JOIN Experto E ON C.expertoID = E.ExpertoID
+    WHERE C.calificacionID = (SELECT calificacionID FROM Pelicula WHERE peliculaID = peliculaIDParam);
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE ObtenerInvolucradosPelicula(IN peliculaID INT)
+BEGIN
+    SELECT
+        I.nombre,
+        R.descripcion AS rol,
+        PI.ordenAparicion,
+        I.paginaWeb,
+        I.facebook,
+        I.instagram,
+        I.twitter
+    FROM PeliculaInvolucrado PI
+    INNER JOIN Involucrado I ON PI.involucradoID = I.involucradoID
+    INNER JOIN Roles R ON PI.rolID = R.rolID
+    WHERE PI.peliculaID = peliculaID;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE ObtenerComentariosPelicula(IN peliculaIDParam INT)
+BEGIN
+    SELECT
+        comentarioID,
+        usuarioID,
+        contenido,
+        fecha
+    FROM Comentarios
+    WHERE peliculaID = peliculaIDParam;
+END //
+DELIMITER ;
