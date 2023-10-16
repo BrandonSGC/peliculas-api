@@ -1,6 +1,9 @@
 import { Pelicula } from '../models/Pelicula.js';
 import { Comentario } from '../models/Comentarios.js'
 import { sequelize } from '../database/connection.js';
+import { Involucrado } from '../models/Involucrado.js';
+import { PeliculaInvolucrado } from '../models/PeliculaInvolucrado.js';
+import { Rol } from '../models/Roles.js'
 
 export const getTop5RecentMovies = async (req, res) => {
   try {
@@ -53,9 +56,9 @@ export const getMovieInfoById = async (req, res) => {
 
 export const createMovie = async (req, res) => {
   try {
-    const { nombre, resena, califiacionID, poster, fecha } = req.body;
+    const { nombre, resena, califiacionID, poster, fecha, involucrados } = req.body;
 
-    await Pelicula.create({
+    const pelicula = await Pelicula.create({
       nombre,
       resena,
       califiacionID,
@@ -63,12 +66,31 @@ export const createMovie = async (req, res) => {
       fecha
     });
 
-    res.status(201).json({ message: 'Película creada exitósamente!' });
+    for (let i = 0; i < involucrados.length; i++) {
+      // Crear el involucrado.
+      const involucrado = await Involucrado.create({
+        nombre: involucrados[i].nombre,
+        paginaWeb: involucrados[i].paginaWeb,
+        facebook: involucrados[i].facebook,
+        instagram: involucrados[i].instagram,
+        twitter: involucrados[i].twitter,
+      });
+      
+      // Enlazar el involucrado a la pelicula.
+      await PeliculaInvolucrado.create({
+        peliculaID: pelicula.peliculaID,
+        involucradoID: involucrado.involucradoID,
+        rolID: involucrados[i].rolID,
+        ordenAparicion: involucrados[i].ordenAparicion,
+      });
+    }
+    res.status(201).json({ message: 'Película creada exitósamente!', pelicula: pelicula });
   } catch (error) {
     console.log(`An error has occurred while creating a movie. ${error}`);
     res.status(500).json({ error: 'Error creating movie' });
   }
 }
+
 
 export const updateMovie = async (req, res) => {
   try {

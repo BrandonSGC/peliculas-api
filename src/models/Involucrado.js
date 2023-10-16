@@ -1,7 +1,7 @@
 import { sequelize } from '../database/connection.js';
 import { DataTypes } from 'sequelize';
 
-const Involucrado = sequelize.define(
+export const Involucrado = sequelize.define(
   'Involucrado',
   {
     involucradoID: {
