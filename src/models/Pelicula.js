@@ -8,7 +8,7 @@ export const Pelicula = sequelize.define('Pelicula', {
     autoIncrement: true,
   },
   nombre: {
-    type: DataTypes.STRING(60),
+    type: DataTypes.STRING(120),
     allowNull: false
   },
   resena: {
