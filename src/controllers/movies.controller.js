@@ -228,27 +228,61 @@ async function getMovieInfo(id) {
   // Validar que encuentra la pelicula.
   if (isEmpty(movieInfo[0])) return null;
 
-  const calificaciones = await sequelize.query('CALL ObtenerCalificacionesPelicula(:peliculaID)', {
+  const calificacionesResults = await sequelize.query('CALL ObtenerCalificacionesPelicula(:peliculaID)', {
     replacements: { peliculaID: id },
     type: sequelize.QueryTypes.SELECT,
   });
 
-  const involucrados = await sequelize.query('CALL ObtenerInvolucradosPelicula(:peliculaID)', {
+  const involucradosResults = await sequelize.query('CALL ObtenerInvolucradosPelicula(:peliculaID)', {
     replacements: { peliculaID: id },
     type: sequelize.QueryTypes.SELECT,
   });
 
-  const comentarios = await sequelize.query('CALL ObtenerComentariosPelicula(:peliculaID)', {
+  const comentariosResults = await sequelize.query('CALL ObtenerComentariosPelicula(:peliculaID)', {
     replacements: { peliculaID: id },
     type: sequelize.QueryTypes.SELECT,
   });
+
+  const calificaciones = calificacionesResults[0] ? calificacionesResults[0]['0'] : null;
+  const involucrados = involucradosResults[0] ? Object.values(involucradosResults[0]) : [];
+  const comentarios = comentariosResults[0] ? Object.values(comentariosResults[0]) : [];
+
+  const formattedInvolucrados = involucrados.map((involucrado) => {
+    return {
+      nombre: involucrado.nombre,
+      rol: involucrado.rol,
+      ordenAparicion: involucrado.ordenAparicion,
+      paginaWeb: involucrado.paginaWeb,
+      facebook: involucrado.facebook,
+      instagram: involucrado.instagram,
+      twitter: involucrado.twitter,
+    };
+  });
+
+  const formattedComentarios = comentarios.map((comentario) => {
+    return {
+      comentarioID: comentario.comentarioID,
+      usuarioID: comentario.usuarioID,
+      contenido: comentario.contenido,
+      fecha: comentario.fecha,
+    };
+  });
+
+  const formattedCalificaciones = calificaciones
+    ? {
+        calificacion: calificaciones.calificacion,
+        nombre_experto: calificaciones.nombre_experto,
+      }
+    : null;
 
   const fullMovieInfo = {
-    movieInfo: movieInfo[0]['0'],
-    calificaciones: calificaciones[0]['0'], 
-    involucrados: involucrados[0] || null,
-    comentarios: comentarios[0] || null,
-  }
+    movieInfo: {
+      ...movieInfo[0]['0'],
+      calificaciones: formattedCalificaciones,
+      involucrados: formattedInvolucrados,
+      comentarios: formattedComentarios,
+    },
+  };
 
   return fullMovieInfo;
 }
