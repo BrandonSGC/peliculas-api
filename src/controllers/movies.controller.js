@@ -249,6 +249,7 @@ async function getMovieInfo(id) {
 
   const formattedInvolucrados = involucrados.map((involucrado) => {
     return {
+      involucradoID: involucrado.involucradoID,
       nombre: involucrado.nombre,
       rol: involucrado.rol,
       ordenAparicion: involucrado.ordenAparicion,
@@ -276,12 +277,10 @@ async function getMovieInfo(id) {
     : null;
 
   const fullMovieInfo = {
-    movieInfo: {
-      ...movieInfo[0]['0'],
-      calificaciones: formattedCalificaciones,
-      involucrados: formattedInvolucrados,
-      comentarios: formattedComentarios,
-    },
+    ...movieInfo[0]['0'],
+    calificaciones: formattedCalificaciones,
+    involucrados: formattedInvolucrados,
+    comentarios: formattedComentarios,
   };
 
   return fullMovieInfo;
