@@ -3,7 +3,37 @@ import { Comentario } from '../models/Comentarios.js'
 import { sequelize } from '../database/connection.js';
 import { Involucrado } from '../models/Involucrado.js';
 import { PeliculaInvolucrado } from '../models/PeliculaInvolucrado.js';
-import { Rol } from '../models/Roles.js'
+
+
+export const getAllMovies = async (req, res) => {
+  try {
+    const { movie } = req.params;
+    const result = await sequelize.query('CALL ObtenerPeliculas(:movie)', {
+      replacements: { movie: movie },
+      type: sequelize.QueryTypes.SELECT,
+    });
+
+    const formattedResult = result.map((item) => {
+      const formattedItems = [];
+      for (let key in item) {
+        if (key !== 'fieldCount' && key !== 'affectedRows' && key !== 'insertId' && key !== 'info' && key !== 'serverStatus' && key !== 'warningStatus' && key !== 'changedRows') {
+          formattedItems.push({
+            peliculaID: item[key].peliculaID,
+            nombre: item[key].nombre,
+          });
+        }
+      }
+      return formattedItems;
+    }).flat();
+    
+    res.status(200).json(formattedResult);
+  } catch (error) {
+    console.error(error); 
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 
 export const getTop5RecentMovies = async (req, res) => {
   try {
