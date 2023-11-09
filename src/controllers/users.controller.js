@@ -233,28 +233,19 @@ export const loginUser = async(req, res) => {
 
 export const updateFailedAttempts = async(req, res) => {
     const { username } = req.body;
+    console.log('Nombre de usuario recibido:', username);
 
     try {
         const user = await Usuario.findOne({ where: { nombreUsuario: username } });
 
         if (user) {
-            // Incrementar el contador de intentos fallidos
-            await user.increment('intentosFallidos');
 
-            // Obtener el nuevo valor del contador
-            const intentosFallidos = user.getDataValue('intentosFallidos');
+            await user.update({ activo: 0 });
 
-            if (intentosFallidos >= 3) {
-                // Cambiar el estado del usuario a inactivo (0) después de tres intentos fallidos
-                await user.update({ activo: 0, intentosFallidos: 0 });
-            }
-
-            res.status(200).json({ message: 'Intentos fallidos actualizados exitosamente.' });
         } else {
             res.status(404).json({ message: 'Usuario no encontrado' });
         }
     } catch (error) {
-        console.error('Error al actualizar intentos fallidos:', error);
-        res.status(500).json({ message: 'Error al actualizar intentos fallidos' });
+        res.status(500).json({ message: 'Error al actualizar el activo' });
     }
 };
