@@ -249,3 +249,23 @@ export const updateFailedAttempts = async(req, res) => {
         res.status(500).json({ message: 'Error al actualizar el activo' });
     }
 };
+
+export const getUsuarioActivo = async(req, res) => {
+    const { username } = req.params;
+
+    try {
+        const user = await Usuario.findOne({
+            attributes: ['activo'],
+            where: { nombreUsuario: username },
+        });
+
+        if (user) {
+            res.status(200).json({ activo: user.activo });
+        } else {
+            res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+    } catch (error) {
+        console.error('Error al obtener el estado activo del usuario:', error);
+        res.status(500).json({ message: 'Error al obtener el estado activo del usuario' });
+    }
+};
