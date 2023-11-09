@@ -25,7 +25,7 @@ export const getAllMovies = async (req, res) => {
       }
       return formattedItems;
     }).flat();
-    
+
     res.status(200).json(formattedResult);
   } catch (error) {
     console.error(error); 
@@ -293,6 +293,7 @@ async function getMovieInfo(id) {
   const formattedComentarios = comentarios.map((comentario) => {
     return {
       comentarioID: comentario.comentarioID,
+      comentarioPadreID: comentario.comentarioPadreID,
       usuarioID: comentario.usuarioID,
       contenido: comentario.contenido,
       fecha: comentario.fecha,
