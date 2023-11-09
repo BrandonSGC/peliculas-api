@@ -13,19 +13,19 @@ export const getUsers = async(req, res) => {
     }
 };
 
-export const getUserByUsername = async (req, res) => {
-    const { username} = req.params;
+export const getUserByUsername = async(req, res) => {
+    const { username } = req.params;
     try {
-      const user = await Usuario.findOne({ where: { nombreUsuario: username } });
-      if (!user) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
-      }
-      res.status(200).json(user);
+        const user = await Usuario.findOne({ where: { nombreUsuario: username } });
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+        res.status(200).json(user);
     } catch (error) {
-      console.log(`Ha ocurrido un error al obtener el usuario: ${error}`);
-      res.status(500).json({ message: error.message });
+        console.log(`Ha ocurrido un error al obtener el usuario: ${error}`);
+        res.status(500).json({ message: error.message });
     }
-  };
+};
 
 
 export const createUser = async(req, res) => {
@@ -142,12 +142,13 @@ export const setUserStatus = async(req, res) => {
 // Función para generar un token
 export function generateToken(userId) {
     const secretKey = '7###saasdyth&^$%'; // Reemplaza con tu clave secreta
-    const token = jwt.sign({ userId }, secretKey, { expiresIn: '5s' }); // Personaliza el tiempo de expiración según tus necesidades
+    const token = jwt.sign({ userId }, secretKey, { expiresIn: '5m' }); // Personaliza el tiempo de expiración según tus necesidades
     return token;
 }
 
+
 // Método privado para validar las credenciales
-const validateCredentials = async(username, password) => {
+const validateCredentials = async(username, password, failedAttempts) => {
     try {
         const results = await sequelize.query('CALL LoginUsuario(?, ?)', {
             replacements: [username, password],
@@ -159,31 +160,47 @@ const validateCredentials = async(username, password) => {
 
         if (p_resultado === 1) {
             // Inicio de sesión exitoso y usuario activo
-            const user = await Usuario.findOne({ where: { nombreUsuario: username } });
-
-            if (user) {
-                // Cambiar el estado del usuario a inactivo (0)
-                await user.update({ activo: 0 });
-            }
-
             return true;
         } else {
             // Inicio de sesión incorrecto o usuario inactivo
+
+            // Incrementar el contador de intentos fallidos localmente
+            const updatedAttempts = failedAttempts + 1;
+
+            if (updatedAttempts >= 3) {
+                // Si hay tres intentos fallidos, informar a la API o tomar la acción necesaria
+                // Puedes enviar una solicitud PUT a la API para actualizar el estado del usuario
+                // fetch('http://localhost:3000/updateFailedAttempts', {
+                //     method: 'PUT',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify({ username }),
+                // })
+                // .then(response => response.json())
+                // .then(data => console.log(data.message))
+                // .catch(error => console.error('Error al informar intentos fallidos:', error));
+
+                console.log('Has alcanzado tres intentos fallidos. Usuario inactivo.');
+            }
+
             return false;
         }
-
     } catch (error) {
         console.error('Error al validar credenciales:', error);
         return false;
     }
 };
 
+
+
 export const loginUser = async(req, res) => {
     const { username, password } = req.body;
+    let failedAttempts = 0;
 
     try {
         // Llamar al método privado para validar las credenciales
-        const isValidCredentials = await validateCredentials(username, password);
+        const isValidCredentials = await validateCredentials(username, password, failedAttempts);
 
         if (isValidCredentials) {
             // Inicio de sesión exitoso y usuario activo
@@ -191,11 +208,44 @@ export const loginUser = async(req, res) => {
             res.json({ token });
         } else {
             // Inicio de sesión incorrecto o usuario inactivo
-            // 401 = Carece de credenciales inválidas.
+            // Incrementar el contador de intentos fallidos
+            failedAttempts++;
+
+            if (failedAttempts >= 3) {
+                // Cambiar el estado del usuario a inactivo (0)
+                const user = await Usuario.findOne({ where: { nombreUsuario: username } });
+
+                if (user) {
+                    await user.update({ activo: 0 });
+                    failedAttempts = 0; // Restablecer el contador después de cambiar el estado
+                }
+            }
+
             res.status(401).json({ message: 'Credenciales inválidas o usuario inactivo' });
         }
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
         res.status(500).json({ message: 'Error al iniciar sesión' });
+    }
+};
+
+
+
+export const updateFailedAttempts = async(req, res) => {
+    const { username } = req.body;
+    console.log('Nombre de usuario recibido:', username);
+
+    try {
+        const user = await Usuario.findOne({ where: { nombreUsuario: username } });
+
+        if (user) {
+
+            await user.update({ activo: 0 });
+
+        } else {
+            res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error al actualizar el activo' });
     }
 };

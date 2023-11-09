@@ -6,8 +6,8 @@ export const sequelize = new Sequelize("proyectoprogv", "root", "root", {
     dialect: "mysql",
 });
 
-//                               **Bryan Connection**
+// //                               **Bryan Connection**
 // export const sequelize = new Sequelize("ProyectoProgV", "root", "jesus261999", {
 //     host: "localhost",
 //     dialect: "mysql",
-// }); 
+// });
