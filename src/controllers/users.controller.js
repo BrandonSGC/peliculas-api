@@ -127,9 +127,10 @@ export const setUserStatus = async(req, res) => {
 // Función para generar un token
 export function generateToken(userId) {
     const secretKey = '7###saasdyth&^$%'; // Reemplaza con tu clave secreta
-    const token = jwt.sign({ userId }, secretKey, { expiresIn: '5s' }); // Personaliza el tiempo de expiración según tus necesidades
+    const token = jwt.sign({ userId }, secretKey, { expiresIn: '5m' }); // Personaliza el tiempo de expiración según tus necesidades
     return token;
 }
+
 
 // Método privado para validar las credenciales
 const validateCredentials = async(username, password) => {
@@ -144,19 +145,26 @@ const validateCredentials = async(username, password) => {
 
         if (p_resultado === 1) {
             // Inicio de sesión exitoso y usuario activo
-            const user = await Usuario.findOne({ where: { nombreUsuario: username } });
-
-            if (user) {
-                // Cambiar el estado del usuario a inactivo (0)
-                await user.update({ activo: 0 });
-            }
-
             return true;
         } else {
             // Inicio de sesión incorrecto o usuario inactivo
-            return false;
-        }
+            const user = await Usuario.findOne({ where: { nombreUsuario: username } });
 
+            if (user) {
+                // Incrementar el contador de intentos fallidos
+                await user.increment('intentosFallidos');
+
+                // Obtener el nuevo valor del contador
+                const intentosFallidos = user.getDataValue('intentosFallidos');
+
+                if (intentosFallidos >= 3) {
+                    // Cambiar el estado del usuario a inactivo (0) después de tres intentos fallidos
+                    await user.update({ activo: 0, intentosFallidos: 0 });
+                }
+
+                return false;
+            }
+        }
     } catch (error) {
         console.error('Error al validar credenciales:', error);
         return false;
