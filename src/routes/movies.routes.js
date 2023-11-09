@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { createMovie, getTop5RecentMovies, getMovieInfoById, updateMovie, deleteMovie, createComment, deleteComment, updateComment } from '../controllers/movies.controller.js';
+import { createMovie, getTop5RecentMovies, getAllMovies, getMovieInfoById, updateMovie, deleteMovie, createComment, deleteComment, updateComment } from '../controllers/movies.controller.js';
 
 const router = Router();
 
+router.get('/allmovies/:movie', getAllMovies);
 router.get('/movies', getTop5RecentMovies);
 router.get('/movies/:id', getMovieInfoById);
 router.post('/movies', createMovie);
