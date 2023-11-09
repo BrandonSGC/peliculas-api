@@ -13,6 +13,21 @@ export const getUsers = async(req, res) => {
     }
 };
 
+export const getUserByUsername = async (req, res) => {
+    const { username} = req.params;
+    try {
+      const user = await Usuario.findOne({ where: { nombreUsuario: username } });
+      if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+      res.status(200).json(user);
+    } catch (error) {
+      console.log(`Ha ocurrido un error al obtener el usuario: ${error}`);
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+
 export const createUser = async(req, res) => {
     try {
         const { nombreUsuario, nombre, apellidos, email, contrasena } = req.body;
