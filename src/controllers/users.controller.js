@@ -65,7 +65,7 @@ export const updateUser = async(req, res) => {
         // Guardar datos actualizados en la base de datos.
         await user.save();
         res.status(200).json({ message: "Usuario actualizado exitosamente!" });
-        
+
     } catch (error) {
         console.log(`Ha ocurrido un error al actualizar un usuario: ${error.message}`);
         res.status(500).json({ message: error.message });
@@ -112,7 +112,7 @@ export const setUserStatus = async(req, res) => {
             res.status(404).json({ message: 'El usuario a modificar el estado no existe.' });
             return;
         }
-        
+
         user.activo = status;
 
         user.save();
@@ -124,12 +124,10 @@ export const setUserStatus = async(req, res) => {
     }
 };
 
-// Controlador para iniciar sesión y generar un token JWT
-const secretKey = '7###saasdyth&^$%'; // Reemplazar con tu clave secreta
-
 // Función para generar un token
 export function generateToken(userId) {
-    const token = jwt.sign({ userId }, secretKey, { expiresIn: '1h' }); // Personalizar el tiempo de expiración según tus necesidades
+    const secretKey = '7###saasdyth&^$%'; // Reemplaza con tu clave secreta
+    const token = jwt.sign({ userId }, secretKey, { expiresIn: '5s' }); // Personaliza el tiempo de expiración según tus necesidades
     return token;
 }
 
@@ -146,6 +144,13 @@ const validateCredentials = async(username, password) => {
 
         if (p_resultado === 1) {
             // Inicio de sesión exitoso y usuario activo
+            const user = await Usuario.findOne({ where: { nombreUsuario: username } });
+
+            if (user) {
+                // Cambiar el estado del usuario a inactivo (0)
+                await user.update({ activo: 0 });
+            }
+
             return true;
         } else {
             // Inicio de sesión incorrecto o usuario inactivo
@@ -157,7 +162,6 @@ const validateCredentials = async(username, password) => {
         return false;
     }
 };
-
 
 export const loginUser = async(req, res) => {
     const { username, password } = req.body;
@@ -172,7 +176,7 @@ export const loginUser = async(req, res) => {
             res.json({ token });
         } else {
             // Inicio de sesión incorrecto o usuario inactivo
-            // 401 = Carece de credenciales Invalidas.
+            // 401 = Carece de credenciales inválidas.
             res.status(401).json({ message: 'Credenciales inválidas o usuario inactivo' });
         }
     } catch (error) {
